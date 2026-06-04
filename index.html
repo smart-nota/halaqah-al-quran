@@ -837,6 +837,9 @@
             thead th { padding: 11px 12px; }
         }
 
+        /* ── UTILITY ── */
+        .hidden { display: none !important; }
+
         /* ── FADE-IN ANIMATION ── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(12px); }
@@ -1156,18 +1159,73 @@
     }
 
     // ════════════════════════════════
-    //  FETCH DATA
+    //  FETCH DATA — Google Sheets JSON
     // ════════════════════════════════
+    // Sheet ID & GID dari link yang diberikan
+    const SHEET_ID  = '1aZT-z69FuqDLFB-RappLCplVDSah3Dy-nXB47nFmV4A';
+    const SHEET_GID = '532320541';
+
     async function panggilData() {
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Memuatkan data...</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5"><span class="spinner"></span> &nbsp;Memuatkan data...</td></tr>';
+
+        // Google Sheets public JSON export URL
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+
         try {
-            const response = await fetch(`${scriptURL}?action=read&nama=${currentUser}`);
-            const res = await response.json();
-            globalLogs = res.allLogs || [];
+            const res  = await fetch(url);
+            const text = await res.text();
+
+            // Google membungkus JSON dalam /*O_o*/ google.visualization.Query.setResponse({...});
+            // Kita perlu buang wrapper tersebut
+            const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
+            const rows = json.table.rows;
+            const cols = json.table.cols; // [{label, type}, ...]
+
+            // Bina peta nama lajur → indeks
+            const colMap = {};
+            cols.forEach((c, i) => {
+                if (c.label) colMap[c.label.trim()] = i;
+            });
+
+            // Helper: nilai sel selamat
+            const val = (row, label) => {
+                const idx = colMap[label];
+                if (idx === undefined) return '';
+                const cell = row.c[idx];
+                return cell && cell.v !== null ? String(cell.v).trim() : '';
+            };
+
+            // Parse semua baris, tapis mengikut nama pengguna semasa
+            globalLogs = [];
+            rows.forEach(row => {
+                if (!row.c || !row.c.length) return;
+
+                // Nama pelajar — lajur pertama atau lajur bernama "Nama" / "NamaPelajar"
+                const nama = val(row, 'Nama') || val(row, 'NamaPelajar') || val(row, 'nama');
+                if (!nama) return; // baris kosong
+                if (nama !== currentUser) return; // bukan pengguna ini
+
+                globalLogs.push({
+                    tarikh:        val(row, 'Tarikh'),
+                    hari:          val(row, 'Hari'),
+                    kehadiran:     val(row, 'Kehadiran'),
+                    sabaStatus:    val(row, 'SabaStatus'),
+                    sabaJuzuk:     val(row, 'SabaJuzuk'),
+                    sabaCatatan:   val(row, 'SabaCatatan'),
+                    praSabaStatus: val(row, 'PraSabaStatus'),
+                    praSabaJuzuk:  val(row, 'PraSabaJuzuk'),
+                    praSabaCatatan:val(row, 'PraSabaCatatan'),
+                    mukhtarStatus: val(row, 'MukhtarStatus'),
+                    mukhtarJuzuk:  val(row, 'MukhtarJuzuk'),
+                    mukhtarCatatan:val(row, 'MukhtarCatatan'),
+                });
+            });
+
             updateStatsByMonth();
         } catch (e) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="5" style="color:var(--red)">Ralat memuatkan data. Hubungi admin.</td></tr>';
+            console.error('panggilData error:', e);
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5" style="color:var(--red)">⚠ Ralat memuatkan data. Pastikan Sheet dikongsi secara awam (Anyone with link → Viewer).</td></tr>';
         }
     }
 
