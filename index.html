@@ -1161,71 +1161,108 @@
     // ════════════════════════════════
     //  FETCH DATA — Google Sheets JSON
     // ════════════════════════════════
-    // Sheet ID & GID dari link yang diberikan
     const SHEET_ID  = '1aZT-z69FuqDLFB-RappLCplVDSah3Dy-nXB47nFmV4A';
     const SHEET_GID = '532320541';
+
+    // Peta alias: field dalaman → kemungkinan nama lajur (lowercase, tanpa ruang)
+    const COL_ALIASES = {
+        nama:           ['nama','namapelajar','name','pelajar'],
+        tarikh:         ['tarikh','date','tarikhbacaan'],
+        hari:           ['hari','day'],
+        kehadiran:      ['kehadiran','hadir','attendance'],
+        sabaStatus:     ['sabastatus','saba\'status','statussaba'],
+        sabaJuzuk:      ['sabajuzuk','saba\'juzuk','juzuksaba'],
+        sabaCatatan:    ['sabacatatan','saba\'catatan','catatansaba'],
+        praSabaStatus:  ['prasabastatus','prasaba\'status','statusprasaba'],
+        praSabaJuzuk:   ['prasabajuzuk','prasaba\'juzuk','juzukprasaba'],
+        praSabaCatatan: ['prasabacatatan','prasaba\'catatan','catatanprasaba'],
+        mukhtarStatus:  ['mukhtarstatus','statusmukhtar'],
+        mukhtarJuzuk:   ['mukhtarjuzuk','juzukmukhtar'],
+        mukhtarCatatan: ['mukhtarcatatan','catatanmukhtar'],
+    };
 
     async function panggilData() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '<tr class="empty-row"><td colspan="5"><span class="spinner"></span> &nbsp;Memuatkan data...</td></tr>';
 
-        // Google Sheets public JSON export URL
         const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
 
         try {
             const res  = await fetch(url);
             const text = await res.text();
 
-            // Google membungkus JSON dalam /*O_o*/ google.visualization.Query.setResponse({...});
-            // Kita perlu buang wrapper tersebut
-            const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-            const rows = json.table.rows;
-            const cols = json.table.cols; // [{label, type}, ...]
+            // Buang wrapper: /*O_o*/google.visualization.Query.setResponse({...});
+            const jsonStr = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
+            const json    = JSON.parse(jsonStr);
+            const rows    = json.table.rows;
+            const cols    = json.table.cols;
 
-            // Bina peta nama lajur → indeks
+            // Log nama lajur sebenar (untuk debug)
+            console.log('Nama lajur sheet:', cols.map(c => c.label));
+
+            // Bina colMap: label_lowercase_tanparuang → indeks
             const colMap = {};
             cols.forEach((c, i) => {
-                if (c.label) colMap[c.label.trim()] = i;
+                const raw   = (c.label || '');
+                colMap[raw.trim()] = i;
+                colMap[raw.toLowerCase().replace(/\s+/g,'').replace(/\'/g,"'")] = i;
             });
 
-            // Helper: nilai sel selamat
-            const val = (row, label) => {
-                const idx = colMap[label];
+            // Resolve setiap field → indeks lajur
+            const fieldIdx = {};
+            Object.entries(COL_ALIASES).forEach(([field, aliases]) => {
+                for (const alias of aliases) {
+                    if (colMap[alias] !== undefined) { fieldIdx[field] = colMap[alias]; break; }
+                }
+            });
+            console.log('Field mapping:', fieldIdx);
+
+            // Helper baca nilai sel
+            const val = (row, field) => {
+                const idx = fieldIdx[field];
                 if (idx === undefined) return '';
-                const cell = row.c[idx];
-                return cell && cell.v !== null ? String(cell.v).trim() : '';
+                const cell = row.c && row.c[idx];
+                return (cell && cell.v != null) ? String(cell.v).trim() : '';
             };
 
-            // Parse semua baris, tapis mengikut nama pengguna semasa
+            const namaIdx = fieldIdx['nama'] !== undefined ? fieldIdx['nama'] : 0;
+
             globalLogs = [];
             rows.forEach(row => {
                 if (!row.c || !row.c.length) return;
-
-                // Nama pelajar — lajur pertama atau lajur bernama "Nama" / "NamaPelajar"
-                const nama = val(row, 'Nama') || val(row, 'NamaPelajar') || val(row, 'nama');
-                if (!nama) return; // baris kosong
-                if (nama !== currentUser) return; // bukan pengguna ini
-
+                const cell = row.c[namaIdx];
+                const nama = (cell && cell.v != null) ? String(cell.v).trim() : '';
+                if (!nama || nama !== currentUser) return;
                 globalLogs.push({
-                    tarikh:        val(row, 'Tarikh'),
-                    hari:          val(row, 'Hari'),
-                    kehadiran:     val(row, 'Kehadiran'),
-                    sabaStatus:    val(row, 'SabaStatus'),
-                    sabaJuzuk:     val(row, 'SabaJuzuk'),
-                    sabaCatatan:   val(row, 'SabaCatatan'),
-                    praSabaStatus: val(row, 'PraSabaStatus'),
-                    praSabaJuzuk:  val(row, 'PraSabaJuzuk'),
-                    praSabaCatatan:val(row, 'PraSabaCatatan'),
-                    mukhtarStatus: val(row, 'MukhtarStatus'),
-                    mukhtarJuzuk:  val(row, 'MukhtarJuzuk'),
-                    mukhtarCatatan:val(row, 'MukhtarCatatan'),
+                    tarikh:         val(row,'tarikh'),
+                    hari:           val(row,'hari'),
+                    kehadiran:      val(row,'kehadiran'),
+                    sabaStatus:     val(row,'sabaStatus'),
+                    sabaJuzuk:      val(row,'sabaJuzuk'),
+                    sabaCatatan:    val(row,'sabaCatatan'),
+                    praSabaStatus:  val(row,'praSabaStatus'),
+                    praSabaJuzuk:   val(row,'praSabaJuzuk'),
+                    praSabaCatatan: val(row,'praSabaCatatan'),
+                    mukhtarStatus:  val(row,'mukhtarStatus'),
+                    mukhtarJuzuk:   val(row,'mukhtarJuzuk'),
+                    mukhtarCatatan: val(row,'mukhtarCatatan'),
                 });
             });
 
+            console.log(`${globalLogs.length} rekod untuk "${currentUser}"`);
+
+            if (globalLogs.length === 0 && rows.length > 0) {
+                const namaUnik = [...new Set(rows.map(r => {
+                    const c = r.c && r.c[namaIdx]; return c && c.v ? String(c.v).trim() : '';
+                }).filter(Boolean))];
+                console.warn('Nama dalam sheet:', namaUnik, '| Login sebagai:', currentUser);
+            }
+
             updateStatsByMonth();
+
         } catch (e) {
             console.error('panggilData error:', e);
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="5" style="color:var(--red)">⚠ Ralat memuatkan data. Pastikan Sheet dikongsi secara awam (Anyone with link → Viewer).</td></tr>';
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5" style="color:var(--red)">\u26a0 Ralat data. Buka Console (F12) untuk debug.</td></tr>';
         }
     }
 
