@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengajian Al-Quran</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0f1e;
+            --surface: #0f1729;
+            --surface2: #151e35;
+            --surface3: #1c2845;
+            --border: rgba(255,255,255,0.07);
+            --border-bright: rgba(99,179,237,0.25);
+            --text: #e8edf5;
+            --text-muted: #6b7fa8;
+            --text-dim: #3d4f72;
+            --gold: #f6c90e;
+            --gold-dim: rgba(246,201,14,0.12);
+            --blue: #3b82f6;
+            --blue-dim: rgba(59,130,246,0.12);
+            --emerald: #10b981;
+            --emerald-dim: rgba(16,185,129,0.12);
+            --amber: #f59e0b;
+            --amber-dim: rgba(245,158,11,0.12);
+            --violet: #8b5cf6;
+            --violet-dim: rgba(139,92,246,0.12);
+            --red: #f87171;
+            --red-dim: rgba(248,113,113,0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --font: 'Sora', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-gold: 0 0 40px rgba(246,201,14,0.08);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 90% 10%, rgba(139,92,246,0.06) 0%, transparent 50%);
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+
+        /* ── SPINNER ── */
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── LOGIN SECTION ── */
+        #loginSection {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(246,201,14,0.5), transparent);
+        }
+        .login-emblem {
+            width: 64px; height: 64px;
+            background: var(--gold-dim);
+            border: 1px solid rgba(246,201,14,0.3);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 28px;
+            font-size: 28px;
+        }
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .login-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 36px;
+            font-weight: 400;
+        }
+        .login-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Dropdown login */
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .select-wrapper::after {
+            content: '▾';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            font-size: 0.75rem;
+        }
+        select.login-select {
+            width: 100%;
+            padding: 14px 40px 14px 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.9rem;
+            font-weight: 500;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        select.login-select:focus {
+            border-color: rgba(246,201,14,0.5);
+            box-shadow: 0 0 0 3px rgba(246,201,14,0.08);
+        }
+        select.login-select option {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        input.login-pass {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            text-align: center;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input.login-pass:focus {
+            border-color: rgba(246,201,14,0.5);
+            box-shadow: 0 0 0 3px rgba(246,201,14,0.08);
+        }
+        input.login-pass::placeholder { color: var(--text-dim); letter-spacing: 0.05em; }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: var(--gold);
+            color: #0a0f1e;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .btn-login:active { transform: scale(0.98); }
+
+        .login-error {
+            font-size: 0.7rem;
+            color: var(--red);
+            text-align: center;
+            margin-top: 14px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: none;
+        }
+
+        /* ── MAIN SECTION ── */
+        #mainSection {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* ── HEADER ── */
+        .top-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 28px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .top-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(246,201,14,0.4), transparent);
+        }
+        @media (min-width: 640px) {
+            .top-header { flex-direction: row; align-items: center; justify-content: space-between; }
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .header-icon {
+            width: 44px; height: 44px;
+            background: var(--gold-dim);
+            border: 1px solid rgba(246,201,14,0.25);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .header-eyebrow {
+            font-size: 0.58rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+        .header-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        .btn-logout {
+            padding: 9px 20px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+        .btn-logout:hover { border-color: var(--border-bright); color: var(--text); }
+
+        /* ── FILTER ── */
+        .filter-wrap {
+            margin-bottom: 24px;
+            max-width: 260px;
+        }
+        .field-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 8px;
+        }
+        select.filter-select {
+            width: 100%;
+            padding: 11px 36px 11px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.82rem;
+            font-weight: 500;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7fa8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select.filter-select:focus {
+            border-color: var(--border-bright);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+        }
+        select.filter-select option { background: var(--surface2); }
+
+        /* ── STAT CARDS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        @media (min-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .25s, transform .2s;
+        }
+        .stat-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .stat-card.blue::after { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+        .stat-card.emerald::after { background: linear-gradient(90deg, transparent, var(--emerald), transparent); }
+        .stat-card.amber::after { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+        .stat-card.violet::after { background: linear-gradient(90deg, transparent, var(--violet), transparent); }
+        .stat-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .stat-card.blue .stat-icon { background: var(--blue-dim); }
+        .stat-card.emerald .stat-icon { background: var(--emerald-dim); }
+        .stat-card.amber .stat-icon { background: var(--amber-dim); }
+        .stat-card.violet .stat-icon { background: var(--violet-dim); }
+        .stat-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── MAIN GRID ── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 1100px) {
+            .main-grid { grid-template-columns: 380px 1fr; }
+        }
+
+        /* ── PANEL (shared card style) ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .panel-title-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 8px rgba(246,201,14,0.5);
+        }
+
+        /* ── LEFT PANEL / FORM TRIGGER ── */
+        .form-panel-body {
+            padding: 22px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 24px;
+        }
+        .empty-icon {
+            width: 72px; height: 72px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+        }
+        .empty-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .empty-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        /* ── FAB BUTTON ── */
+        .fab {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            width: 56px; height: 56px;
+            background: var(--gold);
+            color: #0a0f1e;
+            border: none;
+            border-radius: 16px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(246,201,14,0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform .2s, box-shadow .2s;
+            z-index: 100;
+        }
+        .fab:hover { transform: translateY(-3px) rotate(5deg); box-shadow: 0 12px 32px rgba(246,201,14,0.45); }
+        .fab:active { transform: scale(0.94); }
+
+        /* ── POPUP OVERLAY ── */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,8,18,0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s;
+        }
+        .popup-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        @media (min-width: 640px) {
+            .popup-overlay { align-items: center; padding: 20px; }
+        }
+        .popup-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 520px;
+            max-height: 92vh;
+            overflow-y: auto;
+            transform: translateY(40px);
+            transition: transform .3s cubic-bezier(.22,1,.36,1);
+            position: relative;
+        }
+        .popup-overlay.active .popup-card {
+            transform: translateY(0);
+        }
+        @media (min-width: 640px) {
+            .popup-card {
+                border-radius: 24px;
+                transform: scale(0.97) translateY(10px);
+            }
+            .popup-overlay.active .popup-card { transform: scale(1) translateY(0); }
+        }
+        .popup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(246,201,14,0.4), transparent);
+        }
+        .popup-handle {
+            width: 36px; height: 4px;
+            background: var(--surface3);
+            border-radius: 2px;
+            margin: 14px auto 0;
+            display: block;
+        }
+        @media (min-width: 640px) { .popup-handle { display: none; } }
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .popup-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .popup-close {
+            width: 32px; height: 32px;
+            background: var(--surface3);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s, color .15s;
+        }
+        .popup-close:hover { background: var(--surface3); color: var(--red); }
+        .popup-body { padding: 22px 24px 28px; }
+
+        /* ── FORM FIELDS ── */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 7px;
+        }
+        .form-label.emerald { color: var(--emerald); }
+        .form-label.amber { color: var(--amber); }
+        .form-label.violet { color: var(--violet); }
+
+        select.form-select, input.form-input, textarea.form-textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.82rem;
+            font-weight: 500;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        select.form-select {
+            padding: 11px 32px 11px 14px;
+            appearance: none; -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7fa8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 13px;
+            background-color: var(--surface2);
+        }
+        select.form-select option { background: var(--surface2); color: var(--text); }
+        input.form-input { padding: 11px 14px; }
+        textarea.form-textarea { padding: 10px 14px; height: 64px; resize: none; line-height: 1.5; }
+        select.form-select:focus, input.form-input:focus, textarea.form-textarea:focus {
+            border-color: rgba(246,201,14,0.4);
+            box-shadow: 0 0 0 3px rgba(246,201,14,0.07);
+        }
+        input.form-input::placeholder, textarea.form-textarea::placeholder { color: var(--text-dim); }
+
+        /* Date-time row */
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .section-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .section-group { margin-bottom: 20px; }
+        .sub-fields { display: flex; flex-direction: column; gap: 8px; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--gold);
+            color: #0a0f1e;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 24px;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── TABLE PANEL ── */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        thead tr {
+            background: var(--surface2);
+        }
+        thead th {
+            padding: 13px 16px;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        thead th.emerald { color: var(--emerald); }
+        thead th.amber { color: var(--amber); }
+        thead th.violet { color: var(--violet); }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody tr:last-child { border-bottom: none; }
+
+        td {
+            padding: 14px 16px;
+            font-size: 0.78rem;
+            color: var(--text);
+            vertical-align: top;
+        }
+        .td-date {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .td-hari {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-top: 2px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .badge-hadir { background: var(--emerald-dim); color: var(--emerald); }
+        .badge-tidak { background: var(--red-dim); color: var(--red); }
+
+        .td-detail {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .td-juzuk {
+            font-size: 0.68rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            margin-bottom: 2px;
+        }
+        .td-juzuk.emerald { color: var(--emerald); }
+        .td-juzuk.amber { color: var(--amber); }
+        .td-juzuk.violet { color: var(--violet); }
+
+        .empty-row td {
+            padding: 48px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* ── REFRESH BUTTON ── */
+        .btn-refresh {
+            padding: 6px 14px;
+            background: var(--blue-dim);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 6px;
+            color: var(--blue);
+            font-family: var(--font);
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-refresh:hover { background: rgba(59,130,246,0.2); }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity .3s, transform .3s;
+            pointer-events: none;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        #toast.success { border-color: rgba(16,185,129,0.3); }
+        #toast.error { border-color: rgba(248,113,113,0.3); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 480px) {
+            .login-card { padding: 36px 24px; }
+            .stat-value { font-size: 1.6rem; }
+            .panel-header { padding: 14px 16px; }
+            td { padding: 12px 12px; }
+            thead th { padding: 11px 12px; }
+        }
+
+        /* ── FADE-IN ANIMATION ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up {
+            animation: fadeUp .4s ease both;
+        }
+        .fade-up-1 { animation-delay: .05s; }
+        .fade-up-2 { animation-delay: .1s; }
+        .fade-up-3 { animation-delay: .15s; }
+        .fade-up-4 { animation-delay: .2s; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     LOGIN SECTION
+═══════════════════════════════ -->
+<div id="loginSection">
+    <div class="login-card">
+        <div class="login-emblem">📖</div>
+        <h2 class="login-title">Sistem Pengajian</h2>
+        <p class="login-sub">Al-Quran · Saba' · Mukhtar</p>
+
+        <label class="login-label">Pilih Nama Pelajar</label>
+        <div class="select-wrapper" style="margin-bottom: 16px;">
+            <select id="userSelect" class="login-select">
+                <option value="">— Pilih nama —</option>
+                <option value="Khair">Khair</option>
+                <option value="Nasrullah">Nasrullah</option>
+            </select>
+        </div>
+
+        <label class="login-label">Kata Laluan</label>
+        <input type="password" id="passInput" placeholder="Masukkan kata laluan" class="login-pass">
+
+        <button onclick="checkLogin()" class="btn-login">
+            <span>Akses Sistem</span>
+            <span>→</span>
+        </button>
+        <p id="loginError" class="login-error">⚠ Kata laluan tidak sah!</p>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════
+     MAIN SECTION
+═══════════════════════════════ -->
+<div id="mainSection" class="hidden">
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="header-brand">
+            <div class="header-icon">📖</div>
+            <div>
+                <div class="header-eyebrow">Profil Pelajar</div>
+                <div class="header-name" id="userDisplay"></div>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="btn-logout">Log Keluar</button>
+    </header>
+
+    <!-- Filter Bulan -->
+    <div class="filter-wrap">
+        <label class="field-label">Pilih Rekod Bulan</label>
+        <select id="filterBulan" onchange="updateStatsByMonth()" class="filter-select">
+            <option value="ALL">Semua Rekod</option>
+            <option value="01">Januari</option>
+            <option value="02">Februari</option>
+            <option value="03">Mac</option>
+            <option value="04">April</option>
+            <option value="05">Mei</option>
+            <option value="06">Jun</option>
+            <option value="07">Julai</option>
+            <option value="08">Ogos</option>
+            <option value="09">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Disember</option>
+        </select>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card blue fade-up fade-up-1">
+            <div class="stat-icon">🗓</div>
+            <div class="stat-label">Kehadiran</div>
+            <div class="stat-value" id="statHadir">0</div>
+        </div>
+        <div class="stat-card emerald fade-up fade-up-2">
+            <div class="stat-icon">📗</div>
+            <div class="stat-label">Saba'</div>
+            <div class="stat-value" id="statSaba">0</div>
+        </div>
+        <div class="stat-card amber fade-up fade-up-3">
+            <div class="stat-icon">📙</div>
+            <div class="stat-label">Pra Saba'</div>
+            <div class="stat-value" id="statPraSaba">0</div>
+        </div>
+        <div class="stat-card violet fade-up fade-up-4">
+            <div class="stat-icon">📘</div>
+            <div class="stat-label">Mukhtar</div>
+            <div class="stat-value" id="statMukhtar">0</div>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+        <!-- Left: Info Panel (desktop prompt) -->
+        <div class="panel" id="leftPanel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-title-dot"></span>
+                    Kemaskini Rekod
+                </div>
+            </div>
+            <div class="form-panel-body">
+                <div class="empty-state">
+                    <div class="empty-icon">✏️</div>
+                    <div class="empty-title">Tambah Rekod Baru</div>
+                    <div class="empty-sub">Tekan butang <strong style="color:var(--gold)">+</strong> di bawah kiri skrin untuk membuka borang kemaskini rekod pengajian.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Table Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-title-dot"></span>
+                    Senarai Bacaan Terkini
+                </div>
+                <button onclick="panggilData()" class="btn-refresh">↺ Refresh</button>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tarikh / Hari</th>
+                            <th>Hadir</th>
+                            <th class="emerald">Saba'</th>
+                            <th class="amber">Pra Saba'</th>
+                            <th class="violet">Mukhtar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-row"><td colspan="5">Memuatkan data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════
+     FAB BUTTON
+═══════════════════════════════ -->
+<button class="fab hidden" id="fabBtn" onclick="openPopup()" title="Tambah Rekod">+</button>
+
+<!-- ═══════════════════════════════
+     POPUP FORM
+═══════════════════════════════ -->
+<div class="popup-overlay" id="popupOverlay" onclick="handleOverlayClick(event)">
+    <div class="popup-card" id="popupCard">
+        <span class="popup-handle"></span>
+        <div class="popup-header">
+            <div class="popup-title">
+                <span style="font-size:16px">✏️</span>
+                Kemaskini Rekod Pengajian
+            </div>
+            <button class="popup-close" onclick="closePopup()">✕</button>
+        </div>
+        <div class="popup-body">
+            <form id="recordForm">
+
+                <!-- Tarikh & Hari -->
+                <div class="form-group">
+                    <label class="form-label">Tarikh & Hari</label>
+                    <div class="date-row">
+                        <input type="date" name="Tarikh" id="fieldTarikh" class="form-input" required>
+                        <input type="text" name="Hari" id="fieldHari" class="form-input" placeholder="Isnin" readonly style="background:var(--surface3);cursor:default;">
+                    </div>
+                </div>
+
+                <!-- Kehadiran -->
+                <div class="form-group">
+                    <label class="form-label">Kehadiran</label>
+                    <select name="Kehadiran" class="form-select">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Tidak Hadir">Tidak Hadir</option>
+                    </select>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Saba' -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--emerald);box-shadow:0 0 6px rgba(16,185,129,0.5)"></span>
+                        <span class="section-label" style="color:var(--emerald)">Saba'</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="SabaStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="SabaJuzuk" id="juzukSaba" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="SabaCatatan" class="form-textarea" placeholder="Catatan bacaan Saba'..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Pra Saba' -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,0.5)"></span>
+                        <span class="section-label" style="color:var(--amber)">Pra Saba'</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="PraSabaStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="PraSabaJuzuk" id="juzukPraSaba" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="PraSabaCatatan" class="form-textarea" placeholder="Catatan bacaan Pra Saba'..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Mukhtar -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--violet);box-shadow:0 0 6px rgba(139,92,246,0.5)"></span>
+                        <span class="section-label" style="color:var(--violet)">Mukhtar</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="MukhtarStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="MukhtarJuzuk" id="juzukMukhtar" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="MukhtarCatatan" class="form-textarea" placeholder="Catatan bacaan Mukhtar..."></textarea>
+                    </div>
+                </div>
+
+                <button type="button" id="btnSubmit" onclick="hantarData()" class="btn-submit">
+                    <span>Simpan Rekod</span>
+                    <span>→</span>
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+<script>
+    // ════════════════════════════════
+    //  CONFIG
+    // ════════════════════════════════
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyAsz8_tuEGODr7ccPLRvtWZJS7dNOhjelRhyxcm288eqxXVTX58oNw_j8N2Hzljw/exec';
+
+    const users = {
+        "Khair05": "Khair",
+        "Nas07": "Nasrullah"
+    };
+
+    // Maps dropdown name → password key
+    const nameToPass = {
+        "Khair": "Khair05",
+        "Nasrullah": "Nas07"
+    };
+
+    let currentUser = "";
+    let globalLogs = [];
+
+    const HARI_MS = ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"];
+
+    // ════════════════════════════════
+    //  POPULATE JUZUK
+    // ════════════════════════════════
+    function populateJuzuk() {
+        const selects = ['juzukSaba', 'juzukPraSaba', 'juzukMukhtar'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            for (let i = 1; i <= 30; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.innerHTML = "Juzu' " + i;
+                el.appendChild(opt);
+            }
+        });
+    }
+    populateJuzuk();
+
+    // ════════════════════════════════
+    //  AUTO-FILL HARI FROM TARIKH
+    // ════════════════════════════════
+    document.getElementById('fieldTarikh').addEventListener('change', function() {
+        const val = this.value; // yyyy-mm-dd
+        if (val) {
+            const parts = val.split('-');
+            // Use UTC to avoid timezone shift
+            const d = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2]));
+            document.getElementById('fieldHari').value = HARI_MS[d.getUTCDay()];
+        } else {
+            document.getElementById('fieldHari').value = '';
+        }
+    });
+
+    // Set default date to today
+    function setDefaultDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth()+1).padStart(2,'0');
+        const dd = String(today.getDate()).padStart(2,'0');
+        const fieldTarikh = document.getElementById('fieldTarikh');
+        fieldTarikh.value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('fieldHari').value = HARI_MS[today.getDay()];
+    }
+
+    // ════════════════════════════════
+    //  LOGIN (now uses dropdown + pass)
+    // ════════════════════════════════
+    document.getElementById('passInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkLogin();
+    });
+
+    function checkLogin() {
+        const selectedName = document.getElementById('userSelect').value;
+        const pass = document.getElementById('passInput').value.trim();
+
+        if (!selectedName) {
+            showToast('⚠ Sila pilih nama pelajar', 'error');
+            return;
+        }
+
+        const expectedPass = nameToPass[selectedName];
+        if (pass === expectedPass) {
+            currentUser = selectedName;
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainSection').classList.remove('hidden');
+            document.getElementById('fabBtn').classList.remove('hidden');
+            document.getElementById('userDisplay').innerText = currentUser;
+
+            const currentMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
+            document.getElementById('filterBulan').value = currentMonth;
+
+            panggilData();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+            setTimeout(() => { document.getElementById('loginError').style.display = 'none'; }, 3000);
+        }
+    }
+
+    // ════════════════════════════════
+    //  FETCH DATA
+    // ════════════════════════════════
+    async function panggilData() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Memuatkan data...</td></tr>';
+        try {
+            const response = await fetch(`${scriptURL}?action=read&nama=${currentUser}`);
+            const res = await response.json();
+            globalLogs = res.allLogs || [];
+            updateStatsByMonth();
+        } catch (e) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5" style="color:var(--red)">Ralat memuatkan data. Hubungi admin.</td></tr>';
+        }
+    }
+
+    // ════════════════════════════════
+    //  FILTER & RENDER
+    // ════════════════════════════════
+    function updateStatsByMonth() {
+        const selectedMonth = document.getElementById('filterBulan').value;
+        const tbody = document.getElementById('tableBody');
+
+        let filtered = [];
+        let stats = { hadir: 0, saba: 0, praSaba: 0, mukhtar: 0 };
+
+        globalLogs.forEach(row => {
+            const monthFromRow = row.tarikh.split('/')[1];
+            if (selectedMonth === "ALL" || monthFromRow === selectedMonth) {
+                filtered.push(row);
+                if (row.kehadiran === "Hadir") stats.hadir++;
+                if (row.sabaStatus === "Tasmi'") stats.saba++;
+                if (row.praSabaStatus === "Tasmi'") stats.praSaba++;
+                if (row.mukhtarStatus === "Tasmi'") stats.mukhtar++;
+            }
+        });
+
+        document.getElementById('statHadir').innerText = stats.hadir;
+        document.getElementById('statSaba').innerText = stats.saba;
+        document.getElementById('statPraSaba').innerText = stats.praSaba;
+        document.getElementById('statMukhtar').innerText = stats.mukhtar;
+
+        let html = '';
+        filtered.forEach(row => {
+            const sabaDisp = row.sabaJuzuk
+                ? `<div class="td-juzuk emerald">Juz ${row.sabaJuzuk}</div><div>${row.sabaCatatan || ''}</div>`
+                : `<div>${row.sabaCatatan || '—'}</div>`;
+            const praSabaDisp = row.praSabaJuzuk
+                ? `<div class="td-juzuk amber">Juz ${row.praSabaJuzuk}</div><div>${row.praSabaCatatan || ''}</div>`
+                : `<div>${row.praSabaCatatan || '—'}</div>`;
+            const mukhtarDisp = row.mukhtarJuzuk
+                ? `<div class="td-juzuk violet">Juz ${row.mukhtarJuzuk}</div><div>${row.mukhtarCatatan || ''}</div>`
+                : `<div>${row.mukhtarCatatan || '—'}</div>`;
+
+            html += `
+            <tr>
+                <td>
+                    <div class="td-date">${row.tarikh}</div>
+                    <div class="td-hari">${row.hari || ''}</div>
+                </td>
+                <td>
+                    <span class="badge ${row.kehadiran === 'Hadir' ? 'badge-hadir' : 'badge-tidak'}">
+                        ${row.kehadiran}
+                    </span>
+                </td>
+                <td class="td-detail">${sabaDisp}</td>
+                <td class="td-detail">${praSabaDisp}</td>
+                <td class="td-detail">${mukhtarDisp}</td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html || '<tr class="empty-row"><td colspan="5">Tiada rekod pada bulan ini.</td></tr>';
+    }
+
+    // ════════════════════════════════
+    //  SUBMIT FORM
+    // ════════════════════════════════
+    async function hantarData() {
+        const btn = document.getElementById('btnSubmit');
+        const form = document.getElementById('recordForm');
+
+        // Validate date
+        const tarikhVal = document.getElementById('fieldTarikh').value;
+        if (!tarikhVal) {
+            showToast('⚠ Sila pilih tarikh', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+        const fd = new FormData(form);
+        fd.set('NamaPelajar', currentUser);
+        fd.append('action', 'insert');
+
+        // Convert date to dd/mm/yyyy and add Hari
+        const parts = tarikhVal.split('-');
+        const tarikhFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        fd.set('Tarikh', tarikhFormatted);
+        fd.set('Hari', document.getElementById('fieldHari').value);
+
+        try {
+            await fetch(scriptURL, { method: 'POST', body: fd });
+            showToast('✓ Rekod berjaya disimpan', 'success');
+            form.reset();
+            setDefaultDate();
+            closePopup();
+            panggilData();
+        } catch (e) {
+            showToast('✕ Ralat penghantaran. Cuba lagi.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Simpan Rekod</span><span>→</span>';
+        }
+    }
+
+    // ════════════════════════════════
+    //  POPUP
+    // ════════════════════════════════
+    function openPopup() {
+        setDefaultDate();
+        document.getElementById('popupOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePopup() {
+        document.getElementById('popupOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('popupOverlay')) closePopup();
+    }
+
+    // Close popup on ESC
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closePopup();
+    });
+
+    // ════════════════════════════════
+    //  TOAST
+    // ════════════════════════════════
+    let toastTimeout;
+    function showToast(msg, type='success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'show ' + type;
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => { t.className = ''; }, 3200);
+    }
+</script>
+</body>
+</html>
