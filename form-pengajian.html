@@ -22,10 +22,6 @@
     --gold:      #d4af6a;
     --gold2:     #f0d080;
     --crimson:   #ef4444;
-    --glow-e:    rgba(16,185,129,0.15);
-    --glow-a:    rgba(245,158,11,0.15);
-    --glow-v:    rgba(139,92,246,0.15);
-    --glow-g:    rgba(212,175,106,0.18);
     --radius:    14px;
     --radius-sm: 9px;
   }
@@ -43,7 +39,6 @@
     overflow: hidden;
   }
 
-  /* ─── Ambient background ─── */
   body::before {
     content: '';
     position: fixed;
@@ -56,7 +51,6 @@
     z-index: 0;
   }
 
-  /* ─── Trigger button (demo) ─── */
   .trigger-wrap {
     position: relative;
     z-index: 1;
@@ -83,7 +77,6 @@
   }
   .trigger-btn:active { transform: translateY(0); }
 
-  /* ─── Overlay ─── */
   .popup-overlay {
     position: fixed;
     inset: 0;
@@ -102,14 +95,10 @@
     opacity: 1;
     pointer-events: all;
   }
-
   @media (min-width: 600px) {
-    .popup-overlay {
-      align-items: center;
-    }
+    .popup-overlay { align-items: center; }
   }
 
-  /* ─── Card ─── */
   .popup-card {
     position: relative;
     width: 100%;
@@ -128,9 +117,7 @@
       0 0 0 1px rgba(255,255,255,0.04) inset,
       0 1px 0 rgba(255,255,255,0.08) inset;
   }
-  .popup-overlay.active .popup-card {
-    transform: translateY(0);
-  }
+  .popup-overlay.active .popup-card { transform: translateY(0); }
 
   @media (min-width: 600px) {
     .popup-card {
@@ -138,12 +125,9 @@
       transform: translateY(20px) scale(0.97);
       max-height: 88dvh;
     }
-    .popup-overlay.active .popup-card {
-      transform: translateY(0) scale(1);
-    }
+    .popup-overlay.active .popup-card { transform: translateY(0) scale(1); }
   }
 
-  /* Gold top accent line */
   .popup-card::before {
     content: '';
     position: absolute;
@@ -153,7 +137,6 @@
     z-index: 2;
   }
 
-  /* ─── Handle ─── */
   .popup-handle {
     display: block;
     width: 40px;
@@ -165,7 +148,6 @@
   }
   @media (min-width: 600px) { .popup-handle { display: none; } }
 
-  /* ─── Header ─── */
   .popup-header {
     display: flex;
     align-items: center;
@@ -205,7 +187,6 @@
   }
   .popup-close:hover { background: var(--surface4); color: var(--text); }
 
-  /* ─── Body ─── */
   .popup-body {
     overflow-y: auto;
     flex: 1;
@@ -217,10 +198,7 @@
   .popup-body::-webkit-scrollbar-track { background: transparent; }
   .popup-body::-webkit-scrollbar-thumb { background: var(--surface4); border-radius: 99px; }
 
-  /* ─── Form groups ─── */
-  .form-group {
-    margin-bottom: 14px;
-  }
+  .form-group { margin-bottom: 14px; }
   .form-label {
     display: block;
     font-size: 11px;
@@ -265,10 +243,7 @@
     padding-right: 34px;
     cursor: pointer;
   }
-  .form-select option {
-    background: var(--surface2);
-    color: var(--text);
-  }
+  .form-select option { background: var(--surface2); color: var(--text); }
   .form-textarea {
     resize: none;
     height: 72px;
@@ -285,15 +260,12 @@
     cursor: pointer;
   }
 
-  /* ─── Divider ─── */
   .form-divider {
     height: 1px;
     background: var(--border);
     margin: 16px 0;
-    position: relative;
   }
 
-  /* ─── Section groups ─── */
   .section-group { margin-bottom: 4px; }
   .section-header {
     display: flex;
@@ -318,7 +290,6 @@
     gap: 8px;
   }
 
-  /* ─── Submit button ─── */
   .btn-submit {
     width: 100%;
     margin-top: 20px;
@@ -346,7 +317,6 @@
   .btn-submit:active { transform: translateY(0); }
   .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-  /* ─── Toast ─── */
   #toast {
     position: fixed;
     bottom: 32px;
@@ -366,14 +336,10 @@
     z-index: 2000;
     white-space: nowrap;
   }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   #toast.success { border-color: rgba(16,185,129,0.4); color: var(--emerald); }
   #toast.error   { border-color: rgba(239,68,68,0.4);  color: var(--crimson); }
 
-  /* ─── Loading spinner inside btn ─── */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     width: 15px; height: 15px;
@@ -391,10 +357,6 @@
   <button class="trigger-btn" onclick="openPopup()">✦ Tambah Rekod Pengajian</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     POPUP — 100% ORIGINAL STRUCTURE, ZERO CHANGES BELOW
-     except: (1) Nama dropdown added, (2) CSS vars wired
-     ═══════════════════════════════════════════════════════ -->
 <div class="popup-overlay" id="popupOverlay" onclick="handleOverlayClick(event)">
     <div class="popup-card" id="popupCard">
         <span class="popup-handle"></span>
@@ -408,7 +370,6 @@
         <div class="popup-body">
             <form id="recordForm">
 
-                <!-- ── TAMBAHAN: Nama ── -->
                 <div class="form-group">
                     <label class="form-label">Nama</label>
                     <select name="Nama" id="fieldNama" class="form-select" required>
@@ -418,7 +379,6 @@
                     </select>
                 </div>
 
-                <!-- Tarikh & Hari -->
                 <div class="form-group">
                     <label class="form-label">Tarikh & Hari</label>
                     <div class="date-row">
@@ -427,7 +387,6 @@
                     </div>
                 </div>
 
-                <!-- Kehadiran -->
                 <div class="form-group">
                     <label class="form-label">Kehadiran</label>
                     <select name="Kehadiran" class="form-select">
@@ -438,7 +397,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Saba' -->
                 <div class="section-group">
                     <div class="section-header">
                         <span class="section-dot" style="background:var(--emerald);box-shadow:0 0 6px rgba(16,185,129,0.5)"></span>
@@ -458,7 +416,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Pra Saba' -->
                 <div class="section-group">
                     <div class="section-header">
                         <span class="section-dot" style="background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,0.5)"></span>
@@ -478,7 +435,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Mukhtar -->
                 <div class="section-group">
                     <div class="section-header">
                         <span class="section-dot" style="background:var(--violet);box-shadow:0 0 6px rgba(139,92,246,0.5)"></span>
@@ -506,15 +462,12 @@
     </div>
 </div>
 
-<!-- Toast Notification -->
 <div id="toast"></div>
 
 <script>
-// ─── CONFIG ──────────────────────────────────────────────
-// Paste your Google Apps Script Web App URL here:
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxsQdCzkXR0bLFedlbBRMDfzcuowlfSedt_zrjnfbhwnZKQUQZJS5U_IEtenFFkQHMe/exec";
+// ── URL Web App ──────────────────────────────────────────
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwC0ZRfBtbGPLJSYH8hKZ09H047bmfaXnpkn7JQ48YogHu-IWk0DbHCtP70ivr3XMXB/exec";
 
-// ─── JUZUK ───────────────────────────────────────────────
 const JUZUK_LIST = Array.from({length:30}, (_,i) => `Juzuk ${i+1}`);
 const HARI_MS    = ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"];
 
@@ -529,21 +482,18 @@ function populateJuzuk() {
   });
 }
 
-// ─── DATE → HARI ─────────────────────────────────────────
 document.getElementById("fieldTarikh").addEventListener("change", function() {
   if (!this.value) { document.getElementById("fieldHari").value = ""; return; }
   const d = new Date(this.value + "T00:00:00");
   document.getElementById("fieldHari").value = HARI_MS[d.getDay()];
 });
 
-// ─── POPUP ───────────────────────────────────────────────
 function openPopup()  { document.getElementById("popupOverlay").classList.add("active"); }
 function closePopup() { document.getElementById("popupOverlay").classList.remove("active"); }
 function handleOverlayClick(e) {
   if (e.target === document.getElementById("popupOverlay")) closePopup();
 }
 
-// ─── TOAST ───────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = "") {
   const t = document.getElementById("toast");
@@ -553,32 +503,35 @@ function showToast(msg, type = "") {
   toastTimer = setTimeout(() => { t.className = ""; }, 3500);
 }
 
-// ─── SUBMIT ──────────────────────────────────────────────
+// ── HANTAR DATA — guna URLSearchParams supaya Apps Script boleh baca ──
 async function hantarData() {
-  const form = document.getElementById("recordForm");
-  const btn  = document.getElementById("btnSubmit");
-
-  // Basic validation
+  const form   = document.getElementById("recordForm");
+  const btn    = document.getElementById("btnSubmit");
   const nama   = document.getElementById("fieldNama").value;
   const tarikh = document.getElementById("fieldTarikh").value;
+
   if (!nama)   { showToast("⚠ Sila pilih nama.", "error"); return; }
   if (!tarikh) { showToast("⚠ Sila pilih tarikh.", "error"); return; }
 
-  // Collect
-  const data = Object.fromEntries(new FormData(form).entries());
-  data.Timestamp = new Date().toISOString();
+  // Kumpul semua data form
+  const formData = new FormData(form);
+  formData.set("Timestamp", new Date().toISOString());
 
-  // Loading state
+  // Tukar ke URLSearchParams — cara paling selamat dengan Apps Script
+  const params = new URLSearchParams();
+  for (const [key, val] of formData.entries()) {
+    params.append(key, val);
+  }
+
   btn.disabled = true;
   btn.innerHTML = `<span>Menyimpan...</span><span class="spinner"></span>`;
 
   try {
-    await fetch(WEBAPP_URL, {
-      method:  "POST",
-      mode:    "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(data)
-    });
+    // Hantar sebagai GET request dengan data dalam URL query string
+    // Ini cara yang paling reliable dengan Google Apps Script
+    const url = WEBAPP_URL + "?" + params.toString();
+    await fetch(url, { method: "GET", mode: "no-cors" });
+
     showToast("✓ Rekod berjaya disimpan!", "success");
     form.reset();
     document.getElementById("fieldHari").value = "";
@@ -592,7 +545,6 @@ async function hantarData() {
   }
 }
 
-// ─── INIT ─────────────────────────────────────────────────
 populateJuzuk();
 </script>
 </body>
