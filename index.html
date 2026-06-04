@@ -1164,21 +1164,22 @@
     const SHEET_ID  = '1aZT-z69FuqDLFB-RappLCplVDSah3Dy-nXB47nFmV4A';
     const SHEET_GID = '532320541';
 
-    // Peta alias: field dalaman → kemungkinan nama lajur (lowercase, tanpa ruang)
+    // Peta alias: field dalaman → kemungkinan nama lajur
+    // Nama SEBENAR dalam sheet sudah disahkan dari Console
     const COL_ALIASES = {
-        nama:           ['nama','namapelajar','name','pelajar'],
-        tarikh:         ['tarikh','date','tarikhbacaan'],
-        hari:           ['hari','day'],
-        kehadiran:      ['kehadiran','hadir','attendance'],
-        sabaStatus:     ['sabastatus','saba\'status','statussaba'],
-        sabaJuzuk:      ['sabajuzuk','saba\'juzuk','juzuksaba'],
-        sabaCatatan:    ['sabacatatan','saba\'catatan','catatansaba'],
-        praSabaStatus:  ['prasabastatus','prasaba\'status','statusprasaba'],
-        praSabaJuzuk:   ['prasabajuzuk','prasaba\'juzuk','juzukprasaba'],
-        praSabaCatatan: ['prasabacatatan','prasaba\'catatan','catatanprasaba'],
-        mukhtarStatus:  ['mukhtarstatus','statusmukhtar'],
-        mukhtarJuzuk:   ['mukhtarjuzuk','juzukmukhtar'],
-        mukhtarCatatan: ['mukhtarcatatan','catatanmukhtar'],
+        nama:           ['Nama','nama','namapelajar'],
+        tarikh:         ['Tarikh','tarikh','date'],
+        hari:           ['Hari','hari','day'],
+        kehadiran:      ['Kehadiran','kehadiran','hadir'],
+        sabaStatus:     ['SabaStatus','sabastatus'],
+        sabaJuzuk:      ['SabaJuzuk','sabajuzuk'],
+        sabaCatatan:    ['SabaCatatan','sabacatatan'],
+        praSabaStatus:  ['PraSabaStatus','prasabastatus'],
+        praSabaJuzuk:   ['PraSabaJuzuk','prasabajuzuk'],
+        praSabaCatatan: ['PraSabaCatatan','prasabacatatan'],
+        mukhtarStatus:  ['MukhtarStatus','mukhtarstatus'],
+        mukhtarJuzuk:   ['MukhtarJuzuk','mukhtarjuzuk'],
+        mukhtarCatatan: ['MukhtarCatatan','mukhtarcatatan'],
     };
 
     async function panggilData() {
@@ -1200,29 +1201,44 @@
             // Log nama lajur sebenar (untuk debug)
             console.log('Nama lajur sheet:', cols.map(c => c.label));
 
-            // Bina colMap: label_lowercase_tanparuang → indeks
+            // Bina colMap: exact label + lowercase variant
             const colMap = {};
             cols.forEach((c, i) => {
-                const raw   = (c.label || '');
-                colMap[raw.trim()] = i;
-                colMap[raw.toLowerCase().replace(/\s+/g,'').replace(/\'/g,"'")] = i;
+                const raw = (c.label || '').trim();
+                colMap[raw] = i;                                          // exact: "SabaStatus"
+                colMap[raw.toLowerCase()] = i;                           // lower: "sabastatus"
+                colMap[raw.toLowerCase().replace(/\s+/g,'')] = i;       // nospace
             });
 
             // Resolve setiap field → indeks lajur
             const fieldIdx = {};
             Object.entries(COL_ALIASES).forEach(([field, aliases]) => {
                 for (const alias of aliases) {
-                    if (colMap[alias] !== undefined) { fieldIdx[field] = colMap[alias]; break; }
+                    const key = alias.trim();
+                    if (colMap[key] !== undefined) { fieldIdx[field] = colMap[key]; break; }
+                    if (colMap[key.toLowerCase()] !== undefined) { fieldIdx[field] = colMap[key.toLowerCase()]; break; }
                 }
             });
             console.log('Field mapping:', fieldIdx);
 
-            // Helper baca nilai sel
+            // Helper baca nilai sel — handle Google Date format
             const val = (row, field) => {
                 const idx = fieldIdx[field];
                 if (idx === undefined) return '';
                 const cell = row.c && row.c[idx];
-                return (cell && cell.v != null) ? String(cell.v).trim() : '';
+                if (!cell || cell.v == null) return '';
+                // Google Date: cell.v = "Date(yyyy,m,d)", cell.f = "dd/mm/yyyy" (formatted)
+                if (typeof cell.v === 'string' && cell.v.startsWith('Date(')) {
+                    // Gunakan formatted value jika ada, atau parse manual
+                    if (cell.f) return cell.f.trim();
+                    const m = cell.v.match(/Date\((\d+),(\d+),(\d+)\)/);
+                    if (m) {
+                        const dd = String(m[3]).padStart(2,'0');
+                        const mm = String(parseInt(m[2])+1).padStart(2,'0');
+                        return `${dd}/${mm}/${m[1]}`;
+                    }
+                }
+                return String(cell.v).trim();
             };
 
             const namaIdx = fieldIdx['nama'] !== undefined ? fieldIdx['nama'] : 0;
@@ -1250,6 +1266,7 @@
             });
 
             console.log(`${globalLogs.length} rekod untuk "${currentUser}"`);
+                if (globalLogs.length > 0) console.log('Rekod pertama:', JSON.stringify(globalLogs[0]));
 
             if (globalLogs.length === 0 && rows.length > 0) {
                 const namaUnik = [...new Set(rows.map(r => {
@@ -1276,8 +1293,33 @@
         let filtered = [];
         let stats = { hadir: 0, saba: 0, praSaba: 0, mukhtar: 0 };
 
+        // Ekstrak bulan dari pelbagai format tarikh:
+        // dd/mm/yyyy → bahagian [1]
+        // yyyy-mm-dd → bahagian [1]
+        // "4/6/2025" (Google Sheets Date) → bahagian [1] tapi bulan di [1]
+        // Timestamp Google: "Date(2025,5,4)" → bulan = index+1
+        function extractMonth(tarikh) {
+            if (!tarikh) return null;
+            // Format Google Sheets Date object: "Date(yyyy,m,d)" — bulan 0-indexed
+            const dm = tarikh.match(/Date\((\d+),(\d+),(\d+)\)/);
+            if (dm) return String(parseInt(dm[2]) + 1).padStart(2,'0');
+            // Format dd/mm/yyyy atau d/m/yyyy
+            const slash = tarikh.split('/');
+            if (slash.length === 3) {
+                // Jika bahagian pertama <= 31 (hari), bulan di index 1
+                return slash[1].padStart(2,'0');
+            }
+            // Format yyyy-mm-dd
+            const dash = tarikh.split('-');
+            if (dash.length === 3 && dash[0].length === 4) {
+                return dash[1].padStart(2,'0');
+            }
+            return null;
+        }
+
         globalLogs.forEach(row => {
-            const monthFromRow = row.tarikh.split('/')[1];
+            const monthFromRow = extractMonth(row.tarikh);
+            console.log('Tarikh:', row.tarikh, '→ Bulan:', monthFromRow, '| Filter:', selectedMonth);
             if (selectedMonth === "ALL" || monthFromRow === selectedMonth) {
                 filtered.push(row);
                 if (row.kehadiran === "Hadir") stats.hadir++;
