@@ -461,7 +461,7 @@
             margin-bottom: 24px;
         }
 
-        /* ── FAB BUTTON ── */
+        /* ── FAB LINK ── */
         .fab {
             position: fixed;
             bottom: 28px;
@@ -469,206 +469,17 @@
             width: 56px; height: 56px;
             background: var(--gold);
             color: #0a0f1e;
-            border: none;
             border-radius: 16px;
             font-size: 24px;
             font-weight: 700;
-            cursor: pointer;
             box-shadow: 0 8px 24px rgba(246,201,14,0.35);
             display: flex; align-items: center; justify-content: center;
             transition: transform .2s, box-shadow .2s;
             z-index: 100;
+            text-decoration: none;
         }
         .fab:hover { transform: translateY(-3px) rotate(5deg); box-shadow: 0 12px 32px rgba(246,201,14,0.45); }
         .fab:active { transform: scale(0.94); }
-
-        /* ── POPUP OVERLAY ── */
-        .popup-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(5,8,18,0.85);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            z-index: 200;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding: 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .25s;
-        }
-        .popup-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        @media (min-width: 640px) {
-            .popup-overlay { align-items: center; padding: 20px; }
-        }
-        .popup-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px 24px 0 0;
-            width: 100%;
-            max-width: 520px;
-            max-height: 92vh;
-            overflow-y: auto;
-            transform: translateY(40px);
-            transition: transform .3s cubic-bezier(.22,1,.36,1);
-            position: relative;
-        }
-        .popup-overlay.active .popup-card {
-            transform: translateY(0);
-        }
-        @media (min-width: 640px) {
-            .popup-card {
-                border-radius: 24px;
-                transform: scale(0.97) translateY(10px);
-            }
-            .popup-overlay.active .popup-card { transform: scale(1) translateY(0); }
-        }
-        .popup-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(246,201,14,0.4), transparent);
-        }
-        .popup-handle {
-            width: 36px; height: 4px;
-            background: var(--surface3);
-            border-radius: 2px;
-            margin: 14px auto 0;
-            display: block;
-        }
-        @media (min-width: 640px) { .popup-handle { display: none; } }
-        .popup-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px 24px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .popup-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .popup-close {
-            width: 32px; height: 32px;
-            background: var(--surface3);
-            border: none;
-            border-radius: 8px;
-            color: var(--text-muted);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background .15s, color .15s;
-        }
-        .popup-close:hover { background: var(--surface3); color: var(--red); }
-        .popup-body { padding: 22px 24px 28px; }
-
-        /* ── FORM FIELDS ── */
-        .form-group { margin-bottom: 18px; }
-        .form-label {
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 7px;
-        }
-        .form-label.emerald { color: var(--emerald); }
-        .form-label.amber { color: var(--amber); }
-        .form-label.violet { color: var(--violet); }
-
-        select.form-select, input.form-input, textarea.form-textarea {
-            width: 100%;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-family: var(--font);
-            font-size: 0.82rem;
-            font-weight: 500;
-            outline: none;
-            transition: border-color .2s, box-shadow .2s;
-        }
-        select.form-select {
-            padding: 11px 32px 11px 14px;
-            appearance: none; -webkit-appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7fa8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 13px;
-            background-color: var(--surface2);
-        }
-        select.form-select option { background: var(--surface2); color: var(--text); }
-        input.form-input { padding: 11px 14px; }
-        textarea.form-textarea { padding: 10px 14px; height: 64px; resize: none; line-height: 1.5; }
-        select.form-select:focus, input.form-input:focus, textarea.form-textarea:focus {
-            border-color: rgba(246,201,14,0.4);
-            box-shadow: 0 0 0 3px rgba(246,201,14,0.07);
-        }
-        input.form-input::placeholder, textarea.form-textarea::placeholder { color: var(--text-dim); }
-
-        /* Date-time row */
-        .date-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .form-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 20px 0;
-        }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .section-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .section-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-        .section-group { margin-bottom: 20px; }
-        .sub-fields { display: flex; flex-direction: column; gap: 8px; }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: var(--gold);
-            color: #0a0f1e;
-            font-family: var(--font);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: opacity .2s, transform .15s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 24px;
-        }
-        .btn-submit:hover { opacity: 0.9; }
-        .btn-submit:active { transform: scale(0.98); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ── TABLE PANEL ── */
         .table-scroll {
@@ -952,7 +763,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <button onclick="panggilData()" class="btn-refresh">↺ Refresh</button>
-                <button onclick="openPopup()" class="btn-add-record" title="Tambah Rekod">+</button>
+                <a href="https://halaqah.pages.dev/form-pengajian" target="_blank" class="btn-add-record" title="Tambah Rekod">+</a>
             </div>
         </div>
         <div class="table-scroll">
@@ -974,109 +785,6 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════
-     POPUP FORM
-═══════════════════════════════ -->
-<div class="popup-overlay" id="popupOverlay" onclick="handleOverlayClick(event)">
-    <div class="popup-card" id="popupCard">
-        <span class="popup-handle"></span>
-        <div class="popup-header">
-            <div class="popup-title">
-                <span style="font-size:16px">✏️</span>
-                Kemaskini Rekod Pengajian
-            </div>
-            <button class="popup-close" onclick="closePopup()">✕</button>
-        </div>
-        <div class="popup-body">
-            <form id="recordForm">
-
-                <!-- Tarikh & Hari -->
-                <div class="form-group">
-                    <label class="form-label">Tarikh & Hari</label>
-                    <div class="date-row">
-                        <input type="date" name="Tarikh" id="fieldTarikh" class="form-input" required>
-                        <input type="text" name="Hari" id="fieldHari" class="form-input" placeholder="Isnin" readonly style="background:var(--surface3);cursor:default;">
-                    </div>
-                </div>
-
-                <!-- Kehadiran -->
-                <div class="form-group">
-                    <label class="form-label">Kehadiran</label>
-                    <select name="Kehadiran" class="form-select">
-                        <option value="Hadir">Hadir</option>
-                        <option value="Tidak Hadir">Tidak Hadir</option>
-                    </select>
-                </div>
-
-                <div class="form-divider"></div>
-
-                <!-- Saba' -->
-                <div class="section-group">
-                    <div class="section-header">
-                        <span class="section-dot" style="background:var(--emerald);box-shadow:0 0 6px rgba(16,185,129,0.5)"></span>
-                        <span class="section-label" style="color:var(--emerald)">Saba'</span>
-                    </div>
-                    <div class="sub-fields">
-                        <select name="SabaStatus" class="form-select">
-                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
-                            <option value="Tasmi'">Tasmi'</option>
-                        </select>
-                        <select name="SabaJuzuk" id="juzukSaba" class="form-select">
-                            <option value="">Pilih Juzuk</option>
-                        </select>
-                        <textarea name="SabaCatatan" class="form-textarea" placeholder="Catatan bacaan Saba'..."></textarea>
-                    </div>
-                </div>
-
-                <div class="form-divider"></div>
-
-                <!-- Pra Saba' -->
-                <div class="section-group">
-                    <div class="section-header">
-                        <span class="section-dot" style="background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,0.5)"></span>
-                        <span class="section-label" style="color:var(--amber)">Pra Saba'</span>
-                    </div>
-                    <div class="sub-fields">
-                        <select name="PraSabaStatus" class="form-select">
-                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
-                            <option value="Tasmi'">Tasmi'</option>
-                        </select>
-                        <select name="PraSabaJuzuk" id="juzukPraSaba" class="form-select">
-                            <option value="">Pilih Juzuk</option>
-                        </select>
-                        <textarea name="PraSabaCatatan" class="form-textarea" placeholder="Catatan bacaan Pra Saba'..."></textarea>
-                    </div>
-                </div>
-
-                <div class="form-divider"></div>
-
-                <!-- Mukhtar -->
-                <div class="section-group">
-                    <div class="section-header">
-                        <span class="section-dot" style="background:var(--violet);box-shadow:0 0 6px rgba(139,92,246,0.5)"></span>
-                        <span class="section-label" style="color:var(--violet)">Mukhtar</span>
-                    </div>
-                    <div class="sub-fields">
-                        <select name="MukhtarStatus" class="form-select">
-                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
-                            <option value="Tasmi'">Tasmi'</option>
-                        </select>
-                        <select name="MukhtarJuzuk" id="juzukMukhtar" class="form-select">
-                            <option value="">Pilih Juzuk</option>
-                        </select>
-                        <textarea name="MukhtarCatatan" class="form-textarea" placeholder="Catatan bacaan Mukhtar..."></textarea>
-                    </div>
-                </div>
-
-                <button type="button" id="btnSubmit" onclick="hantarData()" class="btn-submit">
-                    <span>Simpan Rekod</span>
-                    <span>→</span>
-                </button>
-
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- Toast Notification -->
 <div id="toast"></div>
@@ -1092,48 +800,6 @@
 
     const HARI_MS = ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"];
 
-    // ════════════════════════════════
-    //  POPULATE JUZUK
-    // ════════════════════════════════
-    function populateJuzuk() {
-        const selects = ['juzukSaba', 'juzukPraSaba', 'juzukMukhtar'];
-        selects.forEach(id => {
-            const el = document.getElementById(id);
-            for (let i = 1; i <= 30; i++) {
-                let opt = document.createElement('option');
-                opt.value = i;
-                opt.innerHTML = "Juzu' " + i;
-                el.appendChild(opt);
-            }
-        });
-    }
-    populateJuzuk();
-
-    // ════════════════════════════════
-    //  AUTO-FILL HARI FROM TARIKH
-    // ════════════════════════════════
-    document.getElementById('fieldTarikh').addEventListener('change', function() {
-        const val = this.value; // yyyy-mm-dd
-        if (val) {
-            const parts = val.split('-');
-            // Use UTC to avoid timezone shift
-            const d = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2]));
-            document.getElementById('fieldHari').value = HARI_MS[d.getUTCDay()];
-        } else {
-            document.getElementById('fieldHari').value = '';
-        }
-    });
-
-    // Set default date to today
-    function setDefaultDate() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth()+1).padStart(2,'0');
-        const dd = String(today.getDate()).padStart(2,'0');
-        const fieldTarikh = document.getElementById('fieldTarikh');
-        fieldTarikh.value = `${yyyy}-${mm}-${dd}`;
-        document.getElementById('fieldHari').value = HARI_MS[today.getDay()];
-    }
 
     // ════════════════════════════════
     //  LOGIN — dropdown only, no password
@@ -1366,70 +1032,6 @@
         tbody.innerHTML = html || '<tr class="empty-row"><td colspan="5">Tiada rekod pada bulan ini.</td></tr>';
     }
 
-    // ════════════════════════════════
-    //  SUBMIT FORM
-    // ════════════════════════════════
-    async function hantarData() {
-        const btn = document.getElementById('btnSubmit');
-        const form = document.getElementById('recordForm');
-
-        // Validate date
-        const tarikhVal = document.getElementById('fieldTarikh').value;
-        if (!tarikhVal) {
-            showToast('⚠ Sila pilih tarikh', 'error');
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
-
-        const fd = new FormData(form);
-        fd.set('NamaPelajar', currentUser);
-        fd.append('action', 'insert');
-
-        // Convert date to dd/mm/yyyy and add Hari
-        const parts = tarikhVal.split('-');
-        const tarikhFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        fd.set('Tarikh', tarikhFormatted);
-        fd.set('Hari', document.getElementById('fieldHari').value);
-
-        try {
-            await fetch(scriptURL, { method: 'POST', body: fd });
-            showToast('✓ Rekod berjaya disimpan', 'success');
-            form.reset();
-            setDefaultDate();
-            closePopup();
-            panggilData();
-        } catch (e) {
-            showToast('✕ Ralat penghantaran. Cuba lagi.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<span>Simpan Rekod</span><span>→</span>';
-        }
-    }
-
-    // ════════════════════════════════
-    //  POPUP
-    // ════════════════════════════════
-    function openPopup() {
-        setDefaultDate();
-        document.getElementById('popupOverlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closePopup() {
-        document.getElementById('popupOverlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    function handleOverlayClick(e) {
-        if (e.target === document.getElementById('popupOverlay')) closePopup();
-    }
-
-    // Close popup on ESC
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closePopup();
-    });
 
     // ════════════════════════════════
     //  TOAST
