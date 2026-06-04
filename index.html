@@ -779,6 +779,25 @@
         }
         .btn-refresh:hover { background: rgba(59,130,246,0.2); }
 
+        /* ── ADD RECORD BUTTON (header) ── */
+        .btn-add-record {
+            width: 32px; height: 32px;
+            background: var(--gold);
+            color: #0a0f1e;
+            border: none;
+            border-radius: 9px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(246,201,14,0.3);
+            transition: transform .2s, box-shadow .2s, opacity .2s;
+            flex-shrink: 0;
+        }
+        .btn-add-record:hover { transform: scale(1.1) rotate(8deg); box-shadow: 0 6px 20px rgba(246,201,14,0.45); }
+        .btn-add-record:active { transform: scale(0.93); }
+
         /* ── TOAST ── */
         #toast {
             position: fixed;
@@ -844,7 +863,7 @@
         <p class="login-sub">Al-Quran · Saba' · Mukhtar</p>
 
         <label class="login-label">Pilih Nama Pelajar</label>
-        <div class="select-wrapper" style="margin-bottom: 16px;">
+        <div class="select-wrapper" style="margin-bottom: 24px;">
             <select id="userSelect" class="login-select">
                 <option value="">— Pilih nama —</option>
                 <option value="Khair">Khair</option>
@@ -852,14 +871,11 @@
             </select>
         </div>
 
-        <label class="login-label">Kata Laluan</label>
-        <input type="password" id="passInput" placeholder="Masukkan kata laluan" class="login-pass">
-
         <button onclick="checkLogin()" class="btn-login">
             <span>Akses Sistem</span>
             <span>→</span>
         </button>
-        <p id="loginError" class="login-error">⚠ Kata laluan tidak sah!</p>
+        <p id="loginError" class="login-error">⚠ Sila pilih nama pelajar!</p>
     </div>
 </div>
 
@@ -924,59 +940,36 @@
         </div>
     </div>
 
-    <!-- Main Grid -->
-    <div class="main-grid">
-
-        <!-- Left: Info Panel (desktop prompt) -->
-        <div class="panel" id="leftPanel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span class="panel-title-dot"></span>
-                    Kemaskini Rekod
-                </div>
+    <!-- Table Panel (full width) -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">
+                <span class="panel-title-dot"></span>
+                Senarai Bacaan Terkini
             </div>
-            <div class="form-panel-body">
-                <div class="empty-state">
-                    <div class="empty-icon">✏️</div>
-                    <div class="empty-title">Tambah Rekod Baru</div>
-                    <div class="empty-sub">Tekan butang <strong style="color:var(--gold)">+</strong> di bawah kiri skrin untuk membuka borang kemaskini rekod pengajian.</div>
-                </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button onclick="panggilData()" class="btn-refresh">↺ Refresh</button>
+                <button onclick="openPopup()" class="btn-add-record" title="Tambah Rekod">+</button>
             </div>
         </div>
-
-        <!-- Right: Table Panel -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span class="panel-title-dot"></span>
-                    Senarai Bacaan Terkini
-                </div>
-                <button onclick="panggilData()" class="btn-refresh">↺ Refresh</button>
-            </div>
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tarikh / Hari</th>
-                            <th>Hadir</th>
-                            <th class="emerald">Saba'</th>
-                            <th class="amber">Pra Saba'</th>
-                            <th class="violet">Mukhtar</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr class="empty-row"><td colspan="5">Memuatkan data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tarikh / Hari</th>
+                        <th>Hadir</th>
+                        <th class="emerald">Saba'</th>
+                        <th class="amber">Pra Saba'</th>
+                        <th class="violet">Mukhtar</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr class="empty-row"><td colspan="5">Memuatkan data...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
-
-<!-- ═══════════════════════════════
-     FAB BUTTON
-═══════════════════════════════ -->
-<button class="fab hidden" id="fabBtn" onclick="openPopup()" title="Tambah Rekod">+</button>
 
 <!-- ═══════════════════════════════
      POPUP FORM
@@ -1091,17 +1084,6 @@
     // ════════════════════════════════
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyAsz8_tuEGODr7ccPLRvtWZJS7dNOhjelRhyxcm288eqxXVTX58oNw_j8N2Hzljw/exec';
 
-    const users = {
-        "Khair05": "Khair",
-        "Nas07": "Nasrullah"
-    };
-
-    // Maps dropdown name → password key
-    const nameToPass = {
-        "Khair": "Khair05",
-        "Nasrullah": "Nas07"
-    };
-
     let currentUser = "";
     let globalLogs = [];
 
@@ -1151,37 +1133,26 @@
     }
 
     // ════════════════════════════════
-    //  LOGIN (now uses dropdown + pass)
+    //  LOGIN — dropdown only, no password
     // ════════════════════════════════
-    document.getElementById('passInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') checkLogin();
-    });
-
     function checkLogin() {
         const selectedName = document.getElementById('userSelect').value;
-        const pass = document.getElementById('passInput').value.trim();
 
         if (!selectedName) {
-            showToast('⚠ Sila pilih nama pelajar', 'error');
+            document.getElementById('loginError').style.display = 'block';
+            setTimeout(() => { document.getElementById('loginError').style.display = 'none'; }, 3000);
             return;
         }
 
-        const expectedPass = nameToPass[selectedName];
-        if (pass === expectedPass) {
-            currentUser = selectedName;
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('mainSection').classList.remove('hidden');
-            document.getElementById('fabBtn').classList.remove('hidden');
-            document.getElementById('userDisplay').innerText = currentUser;
+        currentUser = selectedName;
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('mainSection').classList.remove('hidden');
+        document.getElementById('userDisplay').innerText = currentUser;
 
-            const currentMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
-            document.getElementById('filterBulan').value = currentMonth;
+        const currentMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
+        document.getElementById('filterBulan').value = currentMonth;
 
-            panggilData();
-        } else {
-            document.getElementById('loginError').style.display = 'block';
-            setTimeout(() => { document.getElementById('loginError').style.display = 'none'; }, 3000);
-        }
+        panggilData();
     }
 
     // ════════════════════════════════
