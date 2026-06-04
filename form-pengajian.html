@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Pengajian</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #09090f;
+    --surface1:  #111118;
+    --surface2:  #16161f;
+    --surface3:  #1e1e2a;
+    --surface4:  #252534;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.12);
+    --text:      #f0f0f8;
+    --muted:     #6b6b88;
+    --emerald:   #10b981;
+    --amber:     #f59e0b;
+    --violet:    #8b5cf6;
+    --gold:      #d4af6a;
+    --gold2:     #f0d080;
+    --crimson:   #ef4444;
+    --glow-e:    rgba(16,185,129,0.15);
+    --glow-a:    rgba(245,158,11,0.15);
+    --glow-v:    rgba(139,92,246,0.15);
+    --glow-g:    rgba(212,175,106,0.18);
+    --radius:    14px;
+    --radius-sm: 9px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ─── Ambient background ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 15%, rgba(139,92,246,0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 35% at 80% 80%, rgba(16,185,129,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 70% 10%, rgba(212,175,106,0.05) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Trigger button (demo) ─── */
+  .trigger-wrap {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .trigger-btn {
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--bg);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 50%, var(--gold) 100%);
+    border: none;
+    padding: 14px 32px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 28px rgba(212,175,106,0.35), 0 4px 16px rgba(0,0,0,0.5);
+    transition: transform .2s, box-shadow .2s;
+    text-transform: uppercase;
+  }
+  .trigger-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(212,175,106,0.5), 0 8px 24px rgba(0,0,0,0.6);
+  }
+  .trigger-btn:active { transform: translateY(0); }
+
+  /* ─── Overlay ─── */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(12px) saturate(0.8);
+    -webkit-backdrop-filter: blur(12px) saturate(0.8);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  @media (min-width: 600px) {
+    .popup-overlay {
+      align-items: center;
+    }
+  }
+
+  /* ─── Card ─── */
+  .popup-card {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    max-height: 92dvh;
+    background: var(--surface1);
+    border: 1px solid var(--border2);
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(40px);
+    transition: transform .35s cubic-bezier(.22,1,.36,1);
+    box-shadow:
+      0 -4px 60px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 1px 0 rgba(255,255,255,0.08) inset;
+  }
+  .popup-overlay.active .popup-card {
+    transform: translateY(0);
+  }
+
+  @media (min-width: 600px) {
+    .popup-card {
+      border-radius: 24px;
+      transform: translateY(20px) scale(0.97);
+      max-height: 88dvh;
+    }
+    .popup-overlay.active .popup-card {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Gold top accent line */
+  .popup-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 35%, var(--gold2) 50%, var(--gold) 65%, transparent 100%);
+    z-index: 2;
+  }
+
+  /* ─── Handle ─── */
+  .popup-handle {
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 99px;
+    margin: 14px auto 0;
+    flex-shrink: 0;
+  }
+  @media (min-width: 600px) { .popup-handle { display: none; } }
+
+  /* ─── Header ─── */
+  .popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .popup-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--text);
+  }
+  .popup-title-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, rgba(212,175,106,0.2), rgba(212,175,106,0.05));
+    border: 1px solid rgba(212,175,106,0.25);
+    display: grid; place-items: center;
+    font-size: 15px;
+  }
+  .popup-close {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+  }
+  .popup-close:hover { background: var(--surface4); color: var(--text); }
+
+  /* ─── Body ─── */
+  .popup-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 16px 20px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface4) transparent;
+  }
+  .popup-body::-webkit-scrollbar { width: 4px; }
+  .popup-body::-webkit-scrollbar-track { background: transparent; }
+  .popup-body::-webkit-scrollbar-thumb { background: var(--surface4); border-radius: 99px; }
+
+  /* ─── Form groups ─── */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    padding: 10px 13px;
+    outline: none;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: rgba(212,175,106,0.5);
+    background: var(--surface3);
+    box-shadow: 0 0 0 3px rgba(212,175,106,0.08);
+  }
+  .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b88' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+  .form-select option {
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .form-textarea {
+    resize: none;
+    height: 72px;
+    line-height: 1.5;
+  }
+  .form-textarea::placeholder { color: var(--muted); }
+  .form-input[readonly] {
+    background: var(--surface3);
+    cursor: default;
+    color: var(--muted);
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.4) sepia(1) saturate(2) hue-rotate(10deg);
+    cursor: pointer;
+  }
+
+  /* ─── Divider ─── */
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+    position: relative;
+  }
+
+  /* ─── Section groups ─── */
+  .section-group { margin-bottom: 4px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .section-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .sub-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ─── Submit button ─── */
+  .btn-submit {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: linear-gradient(135deg, #c9973e 0%, var(--gold2) 45%, #c9973e 100%);
+    color: #1a1000;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(212,175,106,0.3);
+    transition: transform .2s, box-shadow .2s, opacity .2s;
+  }
+  .btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(212,175,106,0.45);
+  }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+  /* ─── Toast ─── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 50px;
+    padding: 11px 22px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s, transform .3s;
+    z-index: 2000;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #toast.success { border-color: rgba(16,185,129,0.4); color: var(--emerald); }
+  #toast.error   { border-color: rgba(239,68,68,0.4);  color: var(--crimson); }
+
+  /* ─── Loading spinner inside btn ─── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(26,16,0,0.3);
+    border-top-color: #1a1000;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="trigger-wrap">
+  <button class="trigger-btn" onclick="openPopup()">✦ Tambah Rekod Pengajian</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     POPUP — 100% ORIGINAL STRUCTURE, ZERO CHANGES BELOW
+     except: (1) Nama dropdown added, (2) CSS vars wired
+     ═══════════════════════════════════════════════════════ -->
+<div class="popup-overlay" id="popupOverlay" onclick="handleOverlayClick(event)">
+    <div class="popup-card" id="popupCard">
+        <span class="popup-handle"></span>
+        <div class="popup-header">
+            <div class="popup-title">
+                <span class="popup-title-icon">✏️</span>
+                Kemaskini Rekod Pengajian
+            </div>
+            <button class="popup-close" onclick="closePopup()">✕</button>
+        </div>
+        <div class="popup-body">
+            <form id="recordForm">
+
+                <!-- ── TAMBAHAN: Nama ── -->
+                <div class="form-group">
+                    <label class="form-label">Nama</label>
+                    <select name="Nama" id="fieldNama" class="form-select" required>
+                        <option value="">Pilih Nama...</option>
+                        <option value="Khair">Khair</option>
+                        <option value="Nasrullah">Nasrullah</option>
+                    </select>
+                </div>
+
+                <!-- Tarikh & Hari -->
+                <div class="form-group">
+                    <label class="form-label">Tarikh & Hari</label>
+                    <div class="date-row">
+                        <input type="date" name="Tarikh" id="fieldTarikh" class="form-input" required>
+                        <input type="text" name="Hari" id="fieldHari" class="form-input" placeholder="Isnin" readonly style="background:var(--surface3);cursor:default;">
+                    </div>
+                </div>
+
+                <!-- Kehadiran -->
+                <div class="form-group">
+                    <label class="form-label">Kehadiran</label>
+                    <select name="Kehadiran" class="form-select">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Tidak Hadir">Tidak Hadir</option>
+                    </select>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Saba' -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--emerald);box-shadow:0 0 6px rgba(16,185,129,0.5)"></span>
+                        <span class="section-label" style="color:var(--emerald)">Saba'</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="SabaStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="SabaJuzuk" id="juzukSaba" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="SabaCatatan" class="form-textarea" placeholder="Catatan bacaan Saba'..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Pra Saba' -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,0.5)"></span>
+                        <span class="section-label" style="color:var(--amber)">Pra Saba'</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="PraSabaStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="PraSabaJuzuk" id="juzukPraSaba" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="PraSabaCatatan" class="form-textarea" placeholder="Catatan bacaan Pra Saba'..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Mukhtar -->
+                <div class="section-group">
+                    <div class="section-header">
+                        <span class="section-dot" style="background:var(--violet);box-shadow:0 0 6px rgba(139,92,246,0.5)"></span>
+                        <span class="section-label" style="color:var(--violet)">Mukhtar</span>
+                    </div>
+                    <div class="sub-fields">
+                        <select name="MukhtarStatus" class="form-select">
+                            <option value="Tidak Tasmi'">Tidak Tasmi'</option>
+                            <option value="Tasmi'">Tasmi'</option>
+                        </select>
+                        <select name="MukhtarJuzuk" id="juzukMukhtar" class="form-select">
+                            <option value="">Pilih Juzuk</option>
+                        </select>
+                        <textarea name="MukhtarCatatan" class="form-textarea" placeholder="Catatan bacaan Mukhtar..."></textarea>
+                    </div>
+                </div>
+
+                <button type="button" id="btnSubmit" onclick="hantarData()" class="btn-submit">
+                    <span>Simpan Rekod</span>
+                    <span>→</span>
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+// Paste your Google Apps Script Web App URL here:
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxsQdCzkXR0bLFedlbBRMDfzcuowlfSedt_zrjnfbhwnZKQUQZJS5U_IEtenFFkQHMe/exec";
+
+// ─── JUZUK ───────────────────────────────────────────────
+const JUZUK_LIST = Array.from({length:30}, (_,i) => `Juzuk ${i+1}`);
+const HARI_MS    = ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"];
+
+function populateJuzuk() {
+  ["juzukSaba","juzukPraSaba","juzukMukhtar"].forEach(id => {
+    const sel = document.getElementById(id);
+    JUZUK_LIST.forEach(j => {
+      const o = document.createElement("option");
+      o.value = o.textContent = j;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// ─── DATE → HARI ─────────────────────────────────────────
+document.getElementById("fieldTarikh").addEventListener("change", function() {
+  if (!this.value) { document.getElementById("fieldHari").value = ""; return; }
+  const d = new Date(this.value + "T00:00:00");
+  document.getElementById("fieldHari").value = HARI_MS[d.getDay()];
+});
+
+// ─── POPUP ───────────────────────────────────────────────
+function openPopup()  { document.getElementById("popupOverlay").classList.add("active"); }
+function closePopup() { document.getElementById("popupOverlay").classList.remove("active"); }
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById("popupOverlay")) closePopup();
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ""; }, 3500);
+}
+
+// ─── SUBMIT ──────────────────────────────────────────────
+async function hantarData() {
+  const form = document.getElementById("recordForm");
+  const btn  = document.getElementById("btnSubmit");
+
+  // Basic validation
+  const nama   = document.getElementById("fieldNama").value;
+  const tarikh = document.getElementById("fieldTarikh").value;
+  if (!nama)   { showToast("⚠ Sila pilih nama.", "error"); return; }
+  if (!tarikh) { showToast("⚠ Sila pilih tarikh.", "error"); return; }
+
+  // Collect
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.Timestamp = new Date().toISOString();
+
+  // Loading state
+  btn.disabled = true;
+  btn.innerHTML = `<span>Menyimpan...</span><span class="spinner"></span>`;
+
+  try {
+    await fetch(WEBAPP_URL, {
+      method:  "POST",
+      mode:    "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(data)
+    });
+    showToast("✓ Rekod berjaya disimpan!", "success");
+    form.reset();
+    document.getElementById("fieldHari").value = "";
+    setTimeout(closePopup, 1400);
+  } catch (err) {
+    console.error(err);
+    showToast("✗ Ralat. Semak sambungan.", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span>Simpan Rekod</span><span>→</span>`;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+populateJuzuk();
+</script>
+</body>
+</html>
